@@ -1,0 +1,88 @@
+/* vip.css — VIP / Premium a'zolik uchun qo'shimcha uslublar. Mavjud token tizimidan foydalanadi
+   (--violet, --ink, --line, --muted, --shadow) va style.css/modules.css/fixes.css bilan mos keladi. */
+
+.vip-badge{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;font-size:13px;vertical-align:-3px;filter:drop-shadow(0 1px 1px #00000022)}
+
+/* ---- Profil / dashboarddagi a'zolik kartasi ---- */
+.mem-rows{margin-top:12px;border-top:1px dashed #e2c766;padding-top:12px}
+.mem-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+.mem-row span{color:var(--muted)}
+.mem-status-active{color:#0c8561}
+.mem-status-expired{color:var(--red)}
+html[data-theme='dark'] .mem-rows{border-top-color:#6b5a1e}
+html[data-theme='dark'] .mem-status-active{color:#5fd8ac}
+html[data-theme='dark'] .mem-status-expired{color:#ff9a92}
+
+/* ---- /vip sahifasi ---- */
+.vip-hero{background:linear-gradient(130deg,#241541,#4b2c8f)!important}
+.vip-hero:after{border-color:#ffffff10}
+.vip-hero .module-copy{min-width:0}
+.vip-hero h1,.vip-hero p{overflow-wrap:break-word}
+.vip-cards{grid-template-columns:repeat(3,1fr);align-items:stretch}
+.vip-card{display:flex;flex-direction:column;position:relative;padding-top:28px;overflow:visible}
+.vip-card:after{display:none}
+.vip-current-flag{position:absolute;top:16px;right:16px;background:#eafbf3;color:#0c8561;font:800 11px 'DM Sans';padding:5px 9px;border-radius:20px;white-space:nowrap;z-index:1}
+.vip-card-desc{margin:6px 0 14px;line-height:1.55}
+.vip-feature-list{padding-left:18px;margin:0;line-height:1.85;flex:1}
+.vip-duration-block{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.vip-duration-label{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--muted);margin-bottom:8px}
+.vip-durations{display:flex;flex-wrap:wrap;gap:6px}
+.vip-dur-btn{padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#f7f8fc;color:var(--ink);font-size:12px;font-weight:700}
+.vip-dur-btn.selected{background:var(--violet);border-color:var(--violet);color:#fff}
+.vip-selected-note{margin:10px 0 0}
+.vip-access-info{margin-top:16px}
+.vip-access-info .btn{width:100%}
+.vip-card.vip-silver{background:linear-gradient(180deg,#fff,#f4f5f9)}
+.vip-card.vip-gold{background:linear-gradient(180deg,#fff,#fffaf0)}
+.vip-card.vip-platinum{background:linear-gradient(180deg,#fff,#f3f0ff);border-color:#c9bdf7}
+html[data-theme='dark'] .vip-card.vip-silver{background:linear-gradient(180deg,#1f2937,#1a2130)}
+html[data-theme='dark'] .vip-card.vip-gold{background:linear-gradient(180deg,#1f2937,#2a2210)}
+html[data-theme='dark'] .vip-card.vip-platinum{background:linear-gradient(180deg,#1f2937,#221a3d)}
+html[data-theme='dark'] .vip-duration-block{border-top-color:var(--theme-border)}
+html[data-theme='dark'] .vip-dur-btn{background:#2a2f45;border-color:var(--theme-border);color:var(--theme-text)}
+
+/* ---- Taqqoslash jadvali ---- */
+.cmp-wrap{background:#fff;border:1px solid var(--line);border-radius:18px;padding:6px;box-shadow:var(--shadow);overflow-x:auto}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}
+.cmp-table th,.cmp-table td{padding:12px 14px;text-align:center;border-bottom:1px solid var(--line)}
+.cmp-table th:first-child,.cmp-table td:first-child{text-align:left;font-weight:700;color:var(--ink)}
+.cmp-table thead th{font:800 12px 'Plus Jakarta Sans';color:var(--muted);letter-spacing:.4px}
+.cmp-table th.cmp-silver{color:#6f7895}.cmp-table th.cmp-gold{color:#a9770f}.cmp-table th.cmp-platinum{color:#6756e9}
+.cmp-table tbody tr:last-child td{border-bottom:0}
+.cmp-yes{color:#0c8561;font-weight:800}
+.cmp-partial{color:#b6841a;font-weight:800}
+.cmp-partial small{font-size:9px;vertical-align:top}
+.cmp-no{color:#c7cbdb}
+.cmp-note{padding:8px 14px 4px}
+html[data-theme='dark'] .cmp-wrap{background:var(--theme-surface);border-color:var(--theme-border)}
+html[data-theme='dark'] .cmp-table th,html[data-theme='dark'] .cmp-table td{border-bottom-color:var(--theme-border)}
+html[data-theme='dark'] .cmp-table th:first-child,html[data-theme='dark'] .cmp-table td:first-child{color:var(--theme-text)}
+html[data-theme='dark'] .cmp-no{color:#4b5468}
+
+/* ---- Admin: VIP Management ---- */
+.vip-mgmt-filters{display:flex;gap:10px;margin-bottom:14px}
+.vip-mgmt-filters input{flex:1;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.vip-mgmt-filters select{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:#fff}
+.vip-mgmt-row{align-items:center;gap:14px}
+.vip-mgmt-status{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.vip-mgmt-actions{display:flex;gap:8px}
+html[data-theme='dark'] .vip-mgmt-filters input,html[data-theme='dark'] .vip-mgmt-filters select{background:var(--theme-surface);border-color:var(--theme-border);color:var(--theme-text)}
+
+/* ---- A'zolik tarixi modali ---- */
+.modal>.vip-hist-modal{width:min(820px,100%);max-width:820px}
+.vip-hist-body{max-height:55vh;overflow:auto;margin:12px 0}
+.vip-hist-table th,.vip-hist-table td{white-space:nowrap;font-size:12px;padding:10px 12px}
+.vip-hist-status{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:800}
+.vip-hist-active{background:#eafbf3;color:#0c8561}
+.vip-hist-expired{background:#fdeceb;color:#c14c3f}
+.vip-hist-extended{background:#eef0ff;color:#4a3fc4}
+.vip-hist-replaced{background:#fff3da;color:#8a6410}
+.vip-hist-changed{background:#e9f4ff;color:#1f67cc}
+.vip-hist-revoked{background:#f3f1ee;color:#6f7895}
+
+@media(max-width:850px){
+  .vip-cards{grid-template-columns:1fr}
+  .vip-mgmt-row{flex-wrap:wrap}
+  .vip-mgmt-status{align-items:flex-start}
+  .vip-mgmt-filters{flex-direction:column}
+}

@@ -1,0 +1,30 @@
+/* Multilevel demo sertifikat (Part 5/5) */
+.ml-cert { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 14px; padding: 14px 16px; border: 1px dashed #d9c48a; border-radius: 12px; background: #fffaf0; }
+.ml-cert-info b { display: block; }
+.ml-cert-info .small { display: block; margin-top: 3px; color: #9b2c22; font-weight: 700; }
+.ml-cert-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.ml-cert-actions .btn { padding: 10px 14px; font-size: 13px; }
+@media (max-width: 560px) { .ml-cert-actions { width: 100%; } .ml-cert-actions .btn { flex: 1 1 100%; } }
+
+body.cert-lock { overflow: hidden; }
+.cert-overlay { position: fixed; inset: 0; z-index: 1200; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 24px 14px; background: rgba(17, 26, 62, .78); }
+.cert-dialog { width: 100%; max-width: 760px; margin: 0 auto; padding: 20px; border-radius: 18px; background: #fff; color: var(--ink); box-shadow: 0 30px 80px rgba(6, 13, 46, .45); }
+.cert-dialog-head { position: sticky; top: -24px; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin: -20px -20px 14px; padding: 20px 20px 12px; border-radius: 18px 18px 0 0; background: inherit; }
+.cert-head-actions { display: flex; align-items: center; gap: 10px; }
+.cert-head-dl { display: none; padding: 10px 14px; font-size: 13px; }
+@media (min-width: 700px) { .cert-head-dl { display: inline-block; } }
+.cert-dialog-head h2 { margin: 6px 0 0; font-size: 22px; }
+.cert-dialog-head .eyebrow { color: #9b2c22; }
+.cert-x { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 50%; background: #f0efff; color: var(--ink); font-size: 24px; line-height: 1; }
+.cert-stage { padding: 10px; border-radius: 12px; background: #eceef6; }
+.cert-canvas { display: block; width: 100%; height: auto; border-radius: 4px; box-shadow: 0 10px 30px rgba(24, 37, 92, .22); background: #fbf9ee; }
+.cert-note { margin: 14px 0 0; line-height: 1.55; }
+.cert-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+@media (max-width: 560px) { .cert-overlay { padding: 10px 8px; } .cert-dialog { padding: 14px; border-radius: 14px; } .cert-dialog-head { top: -10px; margin: -14px -14px 12px; padding: 14px 14px 10px; border-radius: 14px 14px 0 0; } .cert-stage { padding: 6px; } .cert-actions .btn { flex: 1 1 100%; } }
+
+html[data-theme='dark'] .ml-cert { background: var(--theme-surface); border-color: #6b5a1e; }
+html[data-theme='dark'] .ml-cert-info .small { color: #ffb4a8; }
+html[data-theme='dark'] .cert-dialog { background: var(--theme-surface); color: var(--theme-text); }
+html[data-theme='dark'] .cert-dialog-head .eyebrow { color: #ffb4a8; }
+html[data-theme='dark'] .cert-x { background: #2a2f45; color: var(--theme-text); }
+html[data-theme='dark'] .cert-stage { background: #111827; }
