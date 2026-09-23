@@ -43,6 +43,57 @@
     }, true);
   };
 
+  let lastSideEl = null;
+  const closeSideDrawer = () => document.body.classList.remove('side-open');
+  const addSideToggle = () => {
+    const side = document.querySelector('.side');
+    if (!side) {
+      document.querySelector('.side-toggle')?.remove();
+      document.querySelector('.side-backdrop')?.remove();
+      closeSideDrawer();
+      lastSideEl = null;
+      return;
+    }
+    if (side !== lastSideEl) {
+      // Sahifa almashdi (SPA root.innerHTML qayta chizildi) — drawer ochiq qolib ketmasin.
+      closeSideDrawer();
+      lastSideEl = side;
+    }
+    if (!document.querySelector('.side-toggle')) {
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'side-toggle';
+      toggle.setAttribute('aria-label', 'Menyu');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.innerHTML = '<span></span><span></span><span></span>';
+      toggle.onclick = () => {
+        const open = document.body.classList.toggle('side-open');
+        toggle.setAttribute('aria-expanded', String(open));
+      };
+      document.body.appendChild(toggle);
+    }
+    if (!document.querySelector('.side-backdrop')) {
+      const backdrop = document.createElement('div');
+      backdrop.className = 'side-backdrop';
+      backdrop.onclick = closeSideDrawer;
+      document.body.appendChild(backdrop);
+    }
+    if (!side.querySelector('.side-close')) {
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'side-close';
+      close.setAttribute('aria-label', 'Yopish');
+      close.textContent = '×';
+      close.onclick = closeSideDrawer;
+      side.insertBefore(close, side.firstChild);
+    }
+    side.querySelectorAll('.menu a').forEach(a => {
+      if (a.dataset.drawerBound) return;
+      a.dataset.drawerBound = 'true';
+      a.addEventListener('click', closeSideDrawer);
+    });
+  };
+
   const showUploadState = () => {
     const status = document.querySelector('#recordStatus');
     if (status) {
@@ -104,12 +155,15 @@
   const observer = new MutationObserver(() => {
     addThemeToggle();
     fixExam();
+    addSideToggle();
   });
   observer.observe(document.querySelector('#app'), {childList: true, subtree: true});
   document.addEventListener('click', event => {
     const button = event.target.closest('[data-theme-toggle]');
     if (button) toggleTheme();
   });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeSideDrawer(); });
   addThemeToggle();
   fixExam();
+  addSideToggle();
 })();
