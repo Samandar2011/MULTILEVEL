@@ -23,29 +23,16 @@ const sessions={ // sessiyalar data.json ichida saqlanadi: server qayta ishga tu
   delete(t){const d=load(),k=tokenHash(t);if(d.sessions&&d.sessions[k]){delete d.sessions[k];save(d);}}
 };
 const now = () => new Date().toISOString();
-// ---- Xavfsizlik: admin hisobi (Railway Variables) va login urinishlarini cheklash ----
-const ADMIN_EMAIL=(process.env.ADMIN_EMAIL||'').trim().toLowerCase();
-const ADMIN_PASSWORD=process.env.ADMIN_PASSWORD||'';
-const ADMIN_RESET=process.env.ADMIN_RESET==='1'; // 1 bo'lsa, ADMIN_PASSWORD har safar majburan o'rnatiladi (parolni unutsangiz)
-const LOGIN_WINDOW=15*60*1000;
-const loginFails=new Map();
-const clientIp=req=>String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'').split(',').pop().trim();
-const loginKeys=(req,ident)=>['ip:'+clientIp(req),'id:'+String(ident||'').toLowerCase().slice(0,120)];
-const loginLimit=k=>k.startsWith('id:')?15:6;
-function loginLocked(keys){const t=Date.now();let w=0;for(const k of keys){const r=loginFails.get(k);if(r&&r.until>t)w=Math.max(w,Math.ceil((r.until-t)/60000));}return w;}
-function loginFail(keys){const t=Date.now();for(const k of keys){let r=loginFails.get(k);if(!r||t-r.first>LOGIN_WINDOW)r={n:0,first:t,until:0};r.n++;if(r.n>=loginLimit(k))r.until=t+LOGIN_WINDOW;loginFails.set(k,r);}}
-function loginOk(keys){for(const k of keys)loginFails.delete(k);}
-setInterval(()=>{const t=Date.now();for(const [k,r] of loginFails)if(t-r.first>LOGIN_WINDOW&&r.until<t)loginFails.delete(k);},10*60*1000).unref();
 const id = (p='id') => `${p}_${crypto.randomUUID()}`;
 const hash = (value, salt=crypto.randomBytes(16).toString('hex')) => {
   const digest = crypto.scryptSync(value, salt, 64).toString('hex'); return `${salt}:${digest}`;
 };
 const validPassword = (value, stored) => { const [salt, digest] = stored.split(':'); return crypto.timingSafeEqual(Buffer.from(digest, 'hex'), Buffer.from(hash(value, salt).split(':')[1], 'hex')); };
 function seed() {
-  let adminPlain=ADMIN_PASSWORD;if(!adminPlain){adminPlain=crypto.randomBytes(12).toString('base64url');console.log('DIQQAT: ADMIN_PASSWORD berilmagan. Vaqtinchalik admin paroli: '+adminPlain);}
-  const adminPass = hash(adminPlain);
+  const adminPass = hash('Admin@2026'); const studentPass = hash('Student@2026');
   return { users:[
-    {id:'u_admin',name:'Platform Admin',email:ADMIN_EMAIL||'admin@cefrmaster.uz',phone:'+998 90 000 00 00',region:'Toshkent',role:'admin',password:adminPass,status:'active',createdAt:now(),...MEMBERSHIP_DEFAULTS},
+    {id:'u_admin',name:'Platform Admin',email:'admin@cefrmaster.uz',phone:'+998 90 000 00 00',region:'Toshkent',role:'admin',password:adminPass,status:'active',createdAt:now(),...MEMBERSHIP_DEFAULTS},
+    {id:'u_student',name:'Dilnoza Karimova',email:'student@cefrmaster.uz',phone:'+998 90 123 45 67',region:'Samarqand',role:'student',password:studentPass,status:'active',createdAt:now(),...MEMBERSHIP_DEFAULTS}
   ], tests:[
     {id:'ml-01',title:'Multi-Level Mock Test 01',category:'multilevel',description:'To‘liq CEFR sinov imtihoni',duration:120,price:0,status:'published',access:'free',modules:['listening','reading','writing','speaking']},
     {id:'ml-02',title:'Multi-Level Mock Test 02',category:'multilevel',description:'B1–B2 daraja uchun sinov',duration:120,price:39000,status:'published',access:'paid',modules:['listening','reading','writing','speaking']},
@@ -261,23 +248,7 @@ function enrichCatalog(d){
   improveProfessionalBank(d);
   return d;
 }
-function applyAdminCredentials(d){
-  let changed=false;
-  const adm=d.users.find(x=>x.id==='u_admin')||d.users.find(x=>x.role==='super_admin')||d.users.find(x=>x.role==='admin');
-  if(adm){
-    if(ADMIN_EMAIL&&adm.email!==ADMIN_EMAIL&&!d.users.some(x=>x!==adm&&x.email===ADMIN_EMAIL)){adm.email=ADMIN_EMAIL;changed=true;}
-    if(ADMIN_PASSWORD){
-      let isDefault=false,same=false;
-      try{isDefault=validPassword('Admin@2026',adm.password);}catch{}
-      try{same=validPassword(ADMIN_PASSWORD,adm.password);}catch{}
-      if(!same&&(isDefault||ADMIN_RESET)){adm.password=hash(ADMIN_PASSWORD);adm.status='active';changed=true;console.log('Admin paroli Variables dagi ADMIN_PASSWORD ga almashtirildi.');}
-    }
-  }
-  const demo=d.users.find(x=>x.email==='student@cefrmaster.uz');
-  if(demo&&demo.status==='active'){let def=false;try{def=validPassword('Student@2026',demo.password);}catch{}if(def){demo.status='blocked';changed=true;console.log('Standart parolli demo o‘quvchi hisobi bloklandi.');}}
-  return changed;
-}
-function loadFromDisk(){fs.mkdirSync(DATA_DIR,{recursive:true});let d;if(!fs.existsSync(DB)){d=seed();}else d=JSON.parse(fs.readFileSync(DB,'utf8'));d.questions=d.questions.filter(q=>!(q.testId==='reading-01'&&['reading-01-q10','reading-01-q11'].includes(q.id)));d.supportTickets ||= [];ensureMembershipFields(d);if(applyAdminCredentials(d)&&fs.existsSync(DB))fs.writeFileSync(DB,JSON.stringify(d));d.settings ||= {};d.settings.supportTelegram ||= '@onlytowinn';{const existed=fs.existsSync(DB);if(backfillSubmissions(d)&&existed)fs.writeFileSync(DB,JSON.stringify(d,null,2));}if(d.settings.lessonsArchived)return d;const before=JSON.stringify(d.tests).length+JSON.stringify(d.questions).length+JSON.stringify(d.supportTickets).length+JSON.stringify(d.settings).length;enrichCatalog(d);const after=JSON.stringify(d.tests).length+JSON.stringify(d.questions).length+JSON.stringify(d.supportTickets).length+JSON.stringify(d.settings).length;if(!fs.existsSync(DB)||after!==before)fs.writeFileSync(DB,JSON.stringify(d,null,2));return d; }
+function loadFromDisk(){fs.mkdirSync(DATA_DIR,{recursive:true});let d;if(!fs.existsSync(DB)){d=seed();}else d=JSON.parse(fs.readFileSync(DB,'utf8'));d.questions=d.questions.filter(q=>!(q.testId==='reading-01'&&['reading-01-q10','reading-01-q11'].includes(q.id)));d.supportTickets ||= [];ensureMembershipFields(d);d.settings ||= {};d.settings.supportTelegram ||= '@onlytowinn';{const existed=fs.existsSync(DB);if(backfillSubmissions(d)&&existed)fs.writeFileSync(DB,JSON.stringify(d,null,2));}if(d.settings.lessonsArchived)return d;const before=JSON.stringify(d.tests).length+JSON.stringify(d.questions).length+JSON.stringify(d.supportTickets).length+JSON.stringify(d.settings).length;enrichCatalog(d);const after=JSON.stringify(d.tests).length+JSON.stringify(d.questions).length+JSON.stringify(d.supportTickets).length+JSON.stringify(d.settings).length;if(!fs.existsSync(DB)||after!==before)fs.writeFileSync(DB,JSON.stringify(d,null,2));return d; }
 let CACHE=null,saveTimer=null,saving=false,dirty=false;
 function load(){return CACHE||(CACHE=loadFromDisk());}
 function writeNow(){const tmp=DB+'.tmp';fs.writeFileSync(tmp,JSON.stringify(CACHE));fs.renameSync(tmp,DB);dirty=false;}
@@ -557,7 +528,7 @@ function suggestedScores(a){const ms=a?.moduleScores||{},o={listening:ms.listeni
 // ---- Static files: in-memory cache, ETag/304, gzip, bundled CSS/JS ----
 const PUBLIC=path.join(ROOT,'public');
 const MIME={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'application/javascript; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.jpg':'image/jpeg','.ico':'image/x-icon','.json':'application/json','.woff2':'font/woff2'};
-const BUNDLES={'/bundle.css':['style.css','modules.css','glass.css','menu.css','fixes.css','vip.css'],'/bundle.js':['perf-shim.js','vip.js','app.js','enhance.js','fixes.js']};
+const BUNDLES={'/bundle.css':['style.css','modules.css','glass.css','menu.css','fixes.css','vip.css','mobile.css'],'/bundle.js':['perf-shim.js','vip.js','app.js','enhance.js','fixes.js']};
 const fileCache=new Map();
 function minifyCss(c){return c.replace(/\/\*[\s\S]*?\*\//g,'').replace(/\s+/g,' ').replace(/\s*([{};,>])\s*/g,'$1').replace(/;}/g,'}').trim();}
 function buildEntry(key,names,ext){
@@ -600,9 +571,8 @@ function serveStatic(req,res,p){
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,`http://${req.headers.host}`); const p=url.pathname; if(p==='/healthz'){res.writeHead(200,{'Content-Type':'text/plain'});return res.end('ok');} const d=p.startsWith('/api/')?load():null;
   try {
-    if(p.startsWith('/api/'))res.setHeader('X-Robots-Tag','noindex, nofollow');
     if(p.startsWith('/api/')) {
-      if(req.method==='POST'&&(p==='/api/auth/login'||p==='/api/auth/admin-login')){const b=await body(req);const keys=loginKeys(req,b.identifier),wait=loginLocked(keys);if(wait)return json(res,429,{error:'Juda ko‘p noto‘g‘ri urinish. '+wait+' daqiqadan keyin qayta urinib ko‘ring'});const u=d.users.find(x=>(x.email===b.identifier||x.phone===b.identifier)&&x.status==='active');if(!u||!validPassword(b.password||'',u.password)){loginFail(keys);return json(res,401,{error:'Email/telefon yoki parol noto‘g‘ri'});}if(p==='/api/auth/admin-login'&&!['admin','super_admin','examiner','moderator'].includes(u.role))return json(res,403,{error:'Bu hisob administrator paneliga kira olmaydi'});loginOk(keys);const token=crypto.randomBytes(32).toString('hex');sessions.set(token,{userId:u.id});return json(res,200,{token,user:publicUser(u)});}
+      if(req.method==='POST'&&(p==='/api/auth/login'||p==='/api/auth/admin-login')){const b=await body(req);const u=d.users.find(x=>(x.email===b.identifier||x.phone===b.identifier)&&x.status==='active');if(!u||!validPassword(b.password||'',u.password))return json(res,401,{error:'Email/telefon yoki parol noto‘g‘ri'});if(p==='/api/auth/admin-login'&&!['admin','super_admin','examiner','moderator'].includes(u.role))return json(res,403,{error:'Bu hisob administrator paneliga kira olmaydi'});const token=crypto.randomBytes(32).toString('hex');sessions.set(token,{userId:u.id});return json(res,200,{token,user:publicUser(u)});}
       if(req.method==='POST'&&p==='/api/auth/register'){const b=await body(req);if(!b.name||!b.email||!b.password||b.password.length<8)return json(res,400,{error:'Ism, email va kamida 8 belgili parol talab qilinadi'});if(d.users.some(x=>x.email===b.email))return json(res,409,{error:'Bu email allaqachon ro‘yxatdan o‘tgan'});const u={id:id('u'),name:b.name,email:b.email,phone:b.phone||'',region:b.region||'',role:'student',password:hash(b.password),status:'active',createdAt:now(),...MEMBERSHIP_DEFAULTS};d.users.push(u);save(d);const token=crypto.randomBytes(32).toString('hex');sessions.set(token,{userId:u.id});return json(res,201,{token,user:publicUser(u)});}
       if(req.method==='POST'&&p==='/api/auth/logout'){sessions.delete((req.headers.authorization||'').replace('Bearer ',''));return json(res,200,{ok:true});}
       if(req.method==='GET'&&p==='/api/me'){const u=requireUser(req,res,d);if(u)json(res,200,{user:publicUser(u)});return;}
@@ -666,7 +636,6 @@ const server=http.createServer(async(req,res)=>{
       if(req.method==='DELETE'&&adminQuestion){const u=requireRole(req,res,d,['admin','super_admin']);if(!u)return;const i=d.questions.findIndex(x=>x.id===adminQuestion[1]);if(i<0)return json(res,404,{error:'Savol topilmadi'});d.questions.splice(i,1);save(d);return json(res,204,{});}
       if(req.method==='GET'&&p==='/api/admin/reviews'){const u=requireRole(req,res,d,['admin','super_admin','examiner']);if(!u)return;const rows=d.answers.map(a=>{const q=d.questions.find(x=>x.id===a.questionId),at=d.attempts.find(x=>x.id===a.attemptId),student=d.users.find(x=>x.id===at?.userId);return q&&at&&['writing','speaking'].includes(q.type)&&!d.evaluations.some(e=>e.attemptId===at.id&&e.questionId===q.id)?{answer:a,question:q,attempt:at,student:publicUser(student),test:d.tests.find(t=>t.id===at.testId)}:null}).filter(Boolean);return json(res,200,{submissions:rows});}
       if(req.method==='POST'&&p==='/api/admin/evaluations'){const u=requireRole(req,res,d,['admin','super_admin','examiner']);if(!u)return;const b=await body(req),a=d.attempts.find(x=>x.id===b.attemptId),q=d.questions.find(x=>x.id===b.questionId&&['writing','speaking'].includes(x.type));if(!a||!q)return json(res,404,{error:'Topshiriq topilmadi'});if(a.status!=='completed')return json(res,409,{error:'Urinish hali yakunlanmagan'});const overall=Number(b.overall);if(!Number.isFinite(overall)||overall<0||overall>100)return json(res,400,{error:'Umumiy baho 0–100 oralig‘ida bo‘lishi kerak'});let e=d.evaluations.find(x=>x.attemptId===a.id&&x.questionId===q.id);const value={id:e?.id||id('eval'),attemptId:a.id,questionId:q.id,examinerId:u.id,type:q.type,rubric:b.rubric||{},overall,feedback:String(b.feedback||''),updatedAt:now()};if(e)Object.assign(e,value);else d.evaluations.push(value);recalculateAttempt(d,a);syncSubmission(d,a,{reviewerId:u.id});save(d);const sub=d.submissions.find(x=>x.attemptId===a.id);return json(res,200,{evaluation:value,attempt:attemptView(d,a),submission:sub?submissionView(d,sub,true):null});}
-      if(req.method==='POST'&&p==='/api/admin/import-db'){const u=requireRole(req,res,d,['admin','super_admin']);if(!u)return;const b=await body(req),nd=b&&b.data;if(!nd||!Array.isArray(nd.users)||!Array.isArray(nd.tests)||!Array.isArray(nd.questions))return json(res,400,{error:'Bu data.json fayli emas'});try{if(fs.existsSync(DB))fs.copyFileSync(DB,DB+'.pre-import');}catch{}nd.sessions={};save(nd);flushSync();CACHE=null;const nx=load();return json(res,200,{ok:true,users:nx.users.length,tests:nx.tests.length,questions:nx.questions.length});}
       if(req.method==='GET'&&p==='/api/admin/settings'){const u=requireRole(req,res,d,['admin','super_admin']);if(!u)return;return json(res,200,{settings:d.settings});}
       if(req.method==='PUT'&&p==='/api/admin/settings'){const u=requireRole(req,res,d,['admin','super_admin']);if(!u)return;const b=await body(req);d.settings={...d.settings,...b,thresholds:{...d.settings.thresholds,...(b.thresholds||{})}};save(d);return json(res,200,{settings:d.settings});}
       return json(res,404,{error:'API topilmadi'});
