@@ -1,0 +1,84 @@
+/* mobile.css — telefon uchun moslashuv qatlami. bundle.css ning OXIRIDA yuklanadi (server.js -> BUNDLES). */
+html{-webkit-text-size-adjust:100%}
+body{overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+img,canvas,video,svg{max-width:100%}
+
+/* Sichqonchasiz qurilmalarda "hover" harakatlari yopishib qolmasin */
+@media (hover:none){
+  .btn:hover:not(:disabled),.card:hover,.study-test:hover,.hero-cta:hover,.menu a:hover{transform:none!important}
+}
+
+@media (max-width:850px){
+  /* Yengillashtirish: og'ir blur/filtrlar telefonni sekinlashtiradi */
+  .btn,.card,.table-card,.kpi,.learning-path,.module-note,.hero-cta,.nav,.nav .btn.light,.btn.outline{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  .scroll-reveal{filter:none!important;transform:translateY(18px)}.scroll-reveal.is-visible{transform:none}
+  .module-hero:before,.btn:before,.study-test:before{display:none}
+
+  /* Ochiq (public) navbar: havolalar yashirilmaydi, ikkinchi qatorda surib ko'riladi */
+  .nav{height:auto;flex-wrap:wrap;gap:8px 10px;padding:10px 14px}
+  .nav .brand{flex:1 1 auto}
+  .nav .links{display:flex!important;order:3;flex:0 0 100%;overflow-x:auto;gap:2px;padding:3px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .nav .links::-webkit-scrollbar{display:none}
+  .nav .links a{flex:0 0 auto;white-space:nowrap;padding:9px 12px}
+  .nav .btn{padding:9px 12px;font-size:13px}
+
+  /* Kabinet / admin: chapdagi 64px "nuqtalar" o'rniga pastki tab-panel (yozuvlari bilan) */
+  .side{inset:auto 0 0 0;width:100%;height:auto;padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));border-right:0;border-top:1px solid var(--line);z-index:30;display:flex;align-items:center;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .side::-webkit-scrollbar{display:none}
+  .side .brand{display:none}
+  .side .menu{flex-direction:row;gap:4px;flex:1 0 auto}
+  .side .menu a{font-size:12px!important;font-weight:700;white-space:nowrap;text-align:center;padding:10px 12px;margin:0;border-radius:10px;transform:none}
+  .side .menu a::before,.side .menu a:before,.side .menu a.active::before{content:none!important;display:none}
+  .side .theme-toggle{position:static;flex:0 0 auto;margin:0}
+  .app-main{margin-left:0;width:100%;padding:18px 14px calc(96px + env(safe-area-inset-bottom,0px))}
+  .topline{flex-wrap:wrap;gap:12px;margin-bottom:20px}
+  .topline h1{font-size:24px}
+  .toast{left:14px;right:14px;bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+
+  /* Kontent */
+  .table-card{padding:16px;overflow-x:auto}
+  .list-row{flex-wrap:wrap;gap:10px}
+  .list-row>*{min-width:0}
+  .sub-table-wrap,.vip-hist-body{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .kpi b{font-size:22px}
+  .vip-mgmt-actions{flex-wrap:wrap}
+  .section{padding:56px 18px}
+  .section-head{flex-direction:column;align-items:flex-start;gap:10px}
+  .hero{padding:36px 18px 44px}
+  .hero h1{letter-spacing:-1.4px}
+  .hero p{font-size:16px}
+  .preview,.screen{transform:none}
+  .actions{flex-wrap:wrap}
+  .footer{flex-wrap:wrap}
+  .auth-panel{padding:28px 20px}
+  .modal{padding:12px;align-items:end}
+  .modal>div{width:100%;max-width:520px;max-height:calc(100dvh - 24px);overflow-y:auto}
+}
+
+@media (max-width:560px){
+  /* iOS inputga yaqinlashtirib yubormasligi uchun 16px, barmoq uchun 44px tugmalar */
+  input,select,textarea{font-size:16px!important}
+  .btn{min-height:44px}
+  .kpis{grid-template-columns:repeat(2,1fr);gap:10px}
+  .columns{gap:12px}
+  .grid,.mock-grid,.feature-grid,.vip-cards{grid-template-columns:1fr}
+  .stats{gap:14px;padding:22px 18px}
+  .stat b{font-size:24px}
+  .study-test{padding:14px}
+  .list-row .btn,.list-row select{flex:1 1 auto}
+  .vip-mgmt-filters{flex-direction:column}
+}
+
+/* Imtihon ekrani */
+@media (max-width:850px){
+  .exam-top{gap:10px}
+  .exam-top .timer{white-space:nowrap}
+  .q-nav{padding:12px 14px}
+  .q-grid{grid-template-columns:repeat(auto-fill,minmax(38px,1fr))}
+  .q-grid button{height:40px}
+  .question{padding:22px 14px 40px}
+  .question .passage{padding:16px}
+  .option{padding:14px}
+  .exam-actions{flex-wrap:wrap}
+  .exam-actions .btn{flex:1 1 140px}
+}
